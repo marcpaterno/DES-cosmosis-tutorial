@@ -1,0 +1,7 @@
+*.html
+*.docx
+*.pdf
+.Rhistory
+.vagrant/
+*.png
+output/

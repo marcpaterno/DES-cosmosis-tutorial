@@ -1,0 +1,209 @@
+---
+title: "DES CosmoSIS mini-tutorial"
+author: "Marc Paterno"
+date: "12/5/2018 -- version 0.1"
+output:
+  html_document:
+    number_sections: yes
+  word_document: default
+  pdf_document: 
+    latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rcosmosis)
+library(latex2exp)
+```
+
+# CosmoSIS: O que é isso?
+
+CosmoSIS is a *modular* MCMC parameter estimation system.
+It also supports related calculations,
+*e.g.* predictions of observations from different cosmological models.
+
+The CosmoSIS team welcome contributions to CosmoSIS.
+And you’ll get credit whenever someone uses your contribution.
+
+CosmoSIS is found on BitBucket: https://bitbucket.org/joezuntz/cosmosis/wiki/Home.
+
+There are many moving parts;
+follow the installation instructions with care.
+If you're installing on macOS,
+or on a non CentOS or Ubuntu Linux system,
+my personal recommendation is to use the *Docker installation*,
+at least at this time.
+
+# Parts of CosmoSIS
+
+CosmoSIS is a Python program,
+with parts written in C, C++, and Fortran.
+
+A CosmoSIS program consists of:
+
+* one *sampler*
+    * a sampler generates points a the multi-dimensional parameter space,
+      describing a cosmology (and maybe a bunch of nuisance parameters).
+    * CosmoSIS provides a variety of samplers; see the **Samplers** section
+      of the wiki.
+* one or more *modules*, in a sequence called the *pipeline*
+    * *physics modules* calculate quantities derived from the cosmology (and
+      nuisance parameters), and pass them on to later modules in the pipeline.
+    * *likelihood modules* calculate a likelihood (for some data), based upon
+      the cosmology.
+    * A module can do both.
+
+Modules can be written in Python, C, C++, or Fortran.
+
+# CosmoSIS comes with various software tools
+
+A released version of CosmoSIS comes with specific versions of various software
+products. This is intended to make reproducibility easier.
+
+The current release includes, *e.g.*:
+
+product   |    version
+---       | ---
+cfitsio   |       v3_37_0
+cython    |       v0_25_2a
+fftw      |      v3_3_6_pl1a
+gcc       |      v6_3_0
+gsl       |        v2_1
+lapack    |        v3_7_0
+minuit2   |        v5_34_14b
+mpich     |        v3_2_0b
+numpy     |        v1_12_0
+pyfits    |        v3_4
+python    |        v2_7_13d
+pyyaml    |        v3_12c
+scipy     |        v0_19_0
+sqlite    |        v3_16_02_00a
+
+and through *pip*:
+
+package | version
+---     | ---
+astropy | 2.0.9
+emcee | 2.2.1
+ipython | 5.8.0
+ipython-genutils | 0.2.0
+matplotlib | 2.0.0
+mpi4py | 3.0.0
+pyfits | 3.4
+scipy | 0.19.0
+
+# Running CosmoSIS
+
+The CosmoSIS main program is named *cosmosis*.
+A run is configured with two configuration files,
+usually called a "ini file" and a "values file".
+
+The *ini file* tells the program what sampler to use, and what modules to run in the pipeline.
+It also provides configuration information for the sampler and modules.
+Additionally, it specifies the *values file* to be used.
+
+The *values file* specifies the names and ranges of the parameters of the space being sampled.
+
+An optional *priors file* can be used to specify non-uniform priors.
+
+# Now for the live example, and questions!
+
+The example with reproduce the calculations that Kathy showed at the Clusters plenary meeting.
+The plotting is left as an exercise for the student...
+
+We'll be using the *test* sampler, which is not really a MCMC sampler;
+it generates a single point.
+It is useful to verify that your pipeline is working,
+or to look at the physics parameter calculations for a single cosmology
+(which is what we are using it for).
+
+The output of the sampler is a set of text files, in a directory structure:
+```
+.
+├── cmb_cl
+│   ├── bb.txt
+│   ├── ee.txt
+│   ├── ell.txt
+│   ├── te.txt
+│   └── tt.txt
+├── cosmological_parameters
+│   └── values.txt
+├── distances
+│   ├── a.txt
+│   ├── d_a.txt
+│   ├── d_l.txt
+│   ├── d_m.txt
+│   ├── h.txt
+│   ├── mu.txt
+│   ├── values.txt
+│   └── z.txt
+├── linear_cdm_transfer
+│   ├── delta_cdm.txt
+│   ├── k_h.txt
+│   ├── values.txt
+│   └── z.txt
+├── mass_function
+│   ├── dndlnmh.txt
+│   ├── dndlnrh.txt
+│   ├── m_h.txt
+│   ├── r_h.txt
+│   ├── values.txt
+│   └── z.txt
+└── matter_power_lin
+    ├── k_h.txt
+    ├── p_k.txt
+    ├── values.txt
+    └── z.txt
+```
+ The directory names what *section* of the output is being printed;
+ a section is a group of related parameters.
+ What sections are produced depends on the modules that are run;
+ see each module's documentation for details.
+ The files are text-format dumps of `numpy` vectors
+ (possibly multi-dimensional).
+ 
+ CosmoSIS provides a Python script `postprocess`,
+ which can make many plots out-of-the box,
+ and which is configurable
+ (through `matplotlib`) to generate others.
+
+# A note of caution
+
+This is not a general tutorial on MCMC techniques.
+
+However... it seems all to common for people to trust the output of a MCMC calculation
+without testing.
+There is a substantial literature on techniques for diagnosing the convergence
+(or, more properly, diagnosing *failure to converge*)
+of MCMC chains.
+
+Automatic tools will calculate whatever you tell them to calculate.
+Nothing can replace a *thoughtful scientist*,
+who verfies that his or her calculations are working correctly.
+Please investigate!
+
+For **R** users,
+I suggest starting with the `coda` package,
+which implements many of the tests popular in the literature,
+and which provides references for them.
+
+
+# Shameless plug and contribution request
+
+The *very early* beginning of an R package
+to support use of **R** for analysis of CosmoSIS output
+is at https://github.com/marcpaterno/rcosmosis.
+Please feel free to contribute (fork and send pull requests).
+
+```{r}
+
+x <- make.matterpower.dataframe("output/tutorial_a/matter_power_lin/", "a")
+plot1 <- x %>%
+         filter(z %in% c(0.0, 1., 2.0, 3., 4.)) %>%
+         ggplot(aes(x = k_h, y = p_k, colour = factor(z)))
+plot1 + scale_x_log10() + scale_y_log10() +
+        geom_line() + 
+        xlab(TeX("$k_h$")) + ylab(TeX("$p_k$"))
+```
+
