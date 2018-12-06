@@ -1,0 +1,14 @@
+; Parameters and data in CosmoSIS are organized into sections
+; so we can easily see what they mean.
+; There is only one section in this case, called cosmological_parameters
+[cosmological_parameters]
+h0 = 0.7 
+omega_b = 0.044
+omega_k = 0.0
+tau = 0.078
+n_s = 0.95
+log1e10As = 3.90460746e+00
+w = -1.0
+wa = 0.0
+omega_m = 0.318
+sigma8_input = 0.7
